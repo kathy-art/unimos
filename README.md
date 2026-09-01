@@ -44,7 +44,7 @@ The kernel is the scientific claim. The residual track is a gated backup for col
 ## Quick start
 
 > [!TIP]
-> Place preprocessed features under `train_data/` first. The file list is in [docs/data.md](docs/data.md). Without that directory the training entry will not run.
+> Place preprocessed features under `train_data/` first. Without that directory the training entry will not run.
 
 ```bash
 conda create -n unimos python=3.10
@@ -94,12 +94,8 @@ train.py         single run
 tune.py          Optuna HPO
 evaluate.py      test metrics + kernel export
 configs_final/   official split configs and structure ablations
-docs/            data layout and extra notes
+docs/assets/     architecture figure
 ```
-
-## Documentation
-
-- [Data layout](docs/data.md): `train_data/` files the trainer expects, and how to precompute the virtual-cell embedding
 
 ## License
 

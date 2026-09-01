@@ -44,7 +44,7 @@ UniMoS 预测两种药在给定细胞系里是否协同（Loewe > 10）。核轨
 ## 快速开始
 
 > [!TIP]
-> 先把预处理特征放到 `train_data/`。文件清单见 [docs/data.md](docs/data.md)。没有这个目录，训练入口跑不起来。
+> 先把预处理特征放到 `train_data/`。没有这个目录，训练入口跑不起来。
 
 ```bash
 conda create -n unimos python=3.10
@@ -94,12 +94,8 @@ train.py         单次训练
 tune.py          Optuna HPO
 evaluate.py      测试指标 + 核导出
 configs_final/   正式 split 配置与结构消融
-docs/            数据布局和其他说明
+docs/assets/     架构图
 ```
-
-## 文档
-
-- [数据布局](docs/data.md)：训练器需要的 `train_data/` 文件，以及如何预计算虚拟细胞 embedding
 
 ## 许可
 
