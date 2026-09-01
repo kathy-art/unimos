@@ -45,8 +45,6 @@ UniMoS-VC 是用于**药物组合协同效应预测**的可解释深度学习模
 | `unimos/training/loss.py` | BCE/Focal + Huber RI + 核正则 |
 | `unimos/training/metrics.py` | AUROC / AUPRC / 阈值选择 |
 
-详细设计见 [`UniMoS-VC_架构设计.md`](UniMoS-VC_架构设计.md)。
-
 ---
 
 ## 环境
