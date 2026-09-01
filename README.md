@@ -15,41 +15,15 @@ A dual-track model: a cell-conditioned pathway kernel that you can read, plus a 
 UniMoS predicts whether two drugs are synergistic in a given cell line (Loewe > 10). The kernel track scores cross-pathway interactions in a 67-node function space; the virtual-cell module folds a frozen scFoundation embedding, functional activity, and residual expression into one context vector `z_cell` that conditions both tracks.
 
 > [!NOTE]
-> This repository releases **model code, training/eval entry points, and official hyperparameters**. Preprocessed DrugComb features, checkpoints, and manuscript figures are not bundled.
+> This repository releases **model code, training/eval entry points, and official hyperparameters**. Preprocessed DrugComb features and checkpoints are not bundled.
+
+<p align="center">
+  <img src="docs/assets/architecture.jpg" alt="UniMoS architecture" width="100%">
+</p>
 
 ## Architecture
 
 The kernel is the scientific claim. The residual track is a gated backup for cold-start drugs with missing targets. `z_cell` conditions both, so unseen cell lines are not scored with a static pathway matrix.
-
-```mermaid
-flowchart LR
-    subgraph inputs [Inputs]
-      P["pA, pB<br/>function nodes"]
-      S["structure<br/>FP / GIN"]
-      E["cell expression"]
-    end
-
-    subgraph vc [Virtual cell]
-      Z["z_cell = Fuse(z_fm, c, h_cell)"]
-    end
-
-    subgraph kernel [Kernel track]
-      W["W(z_cell) = W_base + ΔW"]
-      C["core logit"]
-    end
-
-    subgraph resid [Residual track]
-      R["resid logit"]
-    end
-
-    Y["logit = core + α(z_cell) · resid"]
-
-    P --> W
-    E --> Z
-    Z --> W --> C --> Y
-    S --> R --> Y
-    Z --> R
-```
 
 | Piece | What it actually does |
 | --- | --- |

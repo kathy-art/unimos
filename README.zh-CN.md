@@ -15,41 +15,15 @@
 UniMoS 预测两种药在给定细胞系里是否协同（Loewe > 10）。核轨道在 67 维功能节点空间里打分跨通路交互；虚拟细胞模块把冻结的 scFoundation embedding、功能活性和表达残差合成一个上下文向量 `z_cell`，同时条件化两条轨道。
 
 > [!NOTE]
-> 本仓库只发布**模型代码、训练/评估入口和正式超参**。预处理 DrugComb 特征、检查点和论文图不随仓库分发。
+> 本仓库只发布**模型代码、训练/评估入口和正式超参**。预处理 DrugComb 特征和检查点不随仓库分发。
+
+<p align="center">
+  <img src="docs/assets/architecture.jpg" alt="UniMoS 架构图" width="100%">
+</p>
 
 ## 架构
 
 核轨道才是科学主张。残差轨道是门控备份，给缺靶点标注的冷启动药物用。`z_cell` 同时条件化两者，所以未见细胞系不会拿一张静态通路矩阵去打分。
-
-```mermaid
-flowchart LR
-    subgraph inputs [输入]
-      P["pA, pB<br/>功能节点"]
-      S["结构<br/>FP / GIN"]
-      E["细胞表达"]
-    end
-
-    subgraph vc [虚拟细胞]
-      Z["z_cell = Fuse(z_fm, c, h_cell)"]
-    end
-
-    subgraph kernel [核轨道]
-      W["W(z_cell) = W_base + ΔW"]
-      C["core logit"]
-    end
-
-    subgraph resid [残差轨道]
-      R["resid logit"]
-    end
-
-    Y["logit = core + α(z_cell) · resid"]
-
-    P --> W
-    E --> Z
-    Z --> W --> C --> Y
-    S --> R --> Y
-    Z --> R
-```
 
 | 模块 | 实际在做什么 |
 | --- | --- |
