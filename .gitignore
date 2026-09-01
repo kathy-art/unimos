@@ -7,6 +7,7 @@ __pycache__/
 
 # data / weights / logs (not part of this core-code release)
 /data/
+/train_data/
 data/processed/
 data/Drugcombv15/
 data/external/

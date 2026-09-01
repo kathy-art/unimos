@@ -36,49 +36,31 @@ import numpy as np
 import pandas as pd
 import torch
 
-REPO = Path("/data/drug_combination/git/unimos_vc")
+REPO = Path(__file__).resolve().parent.parent
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
 from unimos.data.dataset import UniMoSDataset, select_hvg  # noqa: E402
 from unimos.model.unimos import UniMoS  # noqa: E402
 
-# Default (random ensemble) provenance. Kept for backward-compat callers that
-# only ever pass known/novel drugs on the random ensemble.
-DATA = REPO / "data/Drugcombv15/drugcombv15_unimos_pair_study_both_pathway.parquet"
-PROC = REPO / "data/processed"
-FUNC = REPO / "data/Drugcombv15/function_nodes"
+DATA = REPO / "train_data/pairs/unimos_stratified_dataset.parquet"
+PROC = REPO / "train_data/processed"
+FUNC = REPO / "train_data/function_nodes"
 SPLITS = REPO / "splits"
 
-# Sibling (pre-VC) repo — holds the ORIGINAL static split .npz files that the
-# LCO/LDO champion checkpoints were paired with at train time. Confirmed
-# (checkpoints/{lco,ldo}/seed_*/DATA_PROVENANCE.md) that regenerating a split
-# from the seed number alone via build_splits() does NOT reproduce these —
-# LCO ~identical size but different rows; LDO ~87-92% different test set.
-_SIBLING = Path("/data/drug_combination/git/unimos")
-
 # name -> (checkpoint dir, split_type, seeds, provenance dict)
-# provenance: data (pair table), proc (cell/expr features), func (function
-# nodes), npz_tmpl (Path to the split .npz template, or None to use
-# build_splits() — only valid for "random", see note above).
-# UniMoS-VC production ensemble: cell_cond_mode="fm_kernel_interp" everywhere;
-# seed sets and DATA PROVENANCE are NOT symmetric across split types (see
-# project_lco_seed_imbalance_issue memory for the seed asymmetry, and
-# checkpoints/*/DATA_PROVENANCE.md for the data asymmetry — LDO trained
-# against a frozen 168-cell pre-LNCaP snapshot, LCO/random against current).
+# npz_tmpl: Path template for a frozen split .npz, or None to call build_splits().
 ENSEMBLES = {
     "random": ("checkpoints/random/seed_{s}", "random", [0, 1, 2], dict(
         data=DATA, proc=PROC, func=FUNC, npz_tmpl=None,
     )),
     "lco_heldout": ("checkpoints/lco/seed_{s}", "lco", [34, 453, 876], dict(
         data=DATA, proc=PROC, func=FUNC,
-        npz_tmpl=_SIBLING / "splits/leave_cell_out_seed{s}.npz",
+        npz_tmpl=SPLITS / "leave_cell_out_seed{s}.npz",
     )),
     "ldo_heldout": ("checkpoints/ldo/seed_{s}", "ldo", [1, 10, 15], dict(
-        data=REPO / "data_vc_frozen/Drugcombv15/drugcombv15_unimos_pair_study_both_pathway.parquet",
-        proc=REPO / "data_vc_frozen/processed/_168legacy",
-        func=REPO / "data_vc_frozen/Drugcombv15/function_nodes",
-        npz_tmpl=_SIBLING / "splits/leave_drug_out_seed{s}.npz",
+        data=DATA, proc=PROC, func=FUNC,
+        npz_tmpl=SPLITS / "leave_drug_out_seed{s}.npz",
     )),
 }
 

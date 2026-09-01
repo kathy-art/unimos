@@ -63,19 +63,19 @@ GIN 结构编码器还需要 `torch-geometric`（按本机 PyTorch / CUDA 版本
 
 ## 数据（需自行放置）
 
-将预处理特征放到 `data/`（可用 `--proc-dir` / `--func-dir` 覆盖路径）：
+训练入口默认读 `train_data/`（可用 `--proc-dir` / `--func-dir` 覆盖）：
 
 | 文件 | 内容 |
 |------|------|
-| `data/Drugcombv15/drugcombv15_unimos_pair_study_both_pathway.csv` | 主表 |
-| `data/processed/cell_fn_vectors.npy` | 细胞功能节点活性 |
-| `data/processed/cell_mut_fn_vectors.npy` | 细胞突变功能节点 |
-| `data/processed/cell_raw_expr.npy` | 细胞原始表达 |
-| `data/processed/drug_morgan_fps.npy` | Morgan 指纹 |
-| `data/processed/cell_feature_index.json` | 细胞名 → 行索引 |
-| `data/processed/drug_morgan_index.json` | InChIKey → 行索引 |
-| `data/processed/cell_fm_emb.npy` | scFoundation 细胞 embedding（VC） |
-| `data/Drugcombv15/function_nodes/` | 每药一个功能节点 `.npy` |
+| `train_data/pairs/unimos_stratified_dataset.parquet` | 主表 |
+| `train_data/processed/cell_fn_vectors.npy` | 细胞功能节点活性 |
+| `train_data/processed/cell_mut_fn_vectors.npy` | 细胞突变功能节点 |
+| `train_data/processed/cell_raw_expr.npy` | 细胞原始表达 |
+| `train_data/processed/drug_morgan_fps.npy` | Morgan 指纹 |
+| `train_data/processed/cell_feature_index.json` | 细胞名 → 行索引 |
+| `train_data/processed/drug_morgan_index.json` | InChIKey → 行索引 |
+| `train_data/processed/cell_fm_emb.npy` | scFoundation 细胞 embedding（VC） |
+| `train_data/function_nodes/` | 每药一个功能节点 `.npy` |
 
 VC embedding 可用：
 
