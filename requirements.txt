@@ -1,0 +1,8 @@
+torch>=2.0
+lightning>=2.0
+numpy
+pandas
+scipy
+scikit-learn
+pyyaml
+optuna>=3.0

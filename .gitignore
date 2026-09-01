@@ -1,0 +1,36 @@
+# runtime
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+
+# data / weights / logs (not part of this core-code release)
+/data/
+data/processed/
+data/Drugcombv15/
+data/external/
+checkpoints/
+checkpoints_*/
+outputs/
+results/
+opt/
+logs/
+*.ckpt
+*.pt
+*.pth
+*.npy
+*.npz
+*.parquet
+*.h5
+*.hdf5
+*.pkl
+*.log
+*.db
+*.sqlite
+
+# env
+.venv/
+venv/
+.env
+.DS_Store

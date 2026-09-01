@@ -1,0 +1,44 @@
+cell_hidden: 256
+struct_hidden: 512
+rank_r: 32
+lr: 5.6492844862301213e-05
+dropout: 0.18775358376310902
+lambda_ri: 0.014168959180201123
+lambda_res: 0.017636598180266694
+lambda_W: 0.0009447483009934174
+lambda_gamma: 0.0019682526206396653
+lambda_gate: 0.00199583876020452
+loss_type: bce
+focal_gamma: 2.0
+max_epochs: 200
+cell_cond_mode: fm_kernel_interp
+fm_emb_path: data/processed/cell_fm_emb_padded.npy
+fm_kernel_tau: 0.1
+fm_kernel_self_mask: true
+fm_out_dim: 128
+z_cell_dim: 256
+graph_cache: data/processed/drug_graphs.pt
+struct_encoder: gnn
+patience: 20
+batch_size: 256
+use_virtual_cell: true
+ablation_mode: core_only
+use_synergy_regression: true
+syn_metric_cols:
+- zip
+- hsa
+- bliss
+lambda_syn_reg: 1.0
+lambda_cls: 0.5
+syn_metric_hidden: 128
+syn_winsorize_pct:
+- 1.0
+- 99.0
+early_stop_metric: val_auroc
+syn_metric_weight_values:
+- 1.0
+- 1.0
+- 1.0
+pos_weight_scale: 1.044088512210933
+_hpo: opt/hpo_fixsplit/lpo.db (study lpo_fixsplit), tuning seed 34, val_auroc
+_ablation: 'wo_residual: ablation_mode=core_only'
