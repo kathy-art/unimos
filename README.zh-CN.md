@@ -39,7 +39,7 @@ UniMoS 预测两种药在给定细胞系里是否协同（Loewe > 10）。核轨
 - **虚拟细胞条件化。** 未见细胞系用预训练表达 embedding，而不是 one-hot 或单独的 67 维活性。
 - **冷启动拆分才是协议。** 正式配置覆盖 leave-drug-out、leave-cell-out、leave-pair-out 和随机拆分——真正要紧的是 LDO/LCO。
 - **门控残差，不是第二个黑盒。** 结构和 RI 能兜底无标注药物；`α(z_cell)` 有正则，核仍然可问责。
-- **正式配置，不是超参堆场。** `configs_final/` 只有四场景生产设置和对应结构消融（`wo_vc`、`wo_gnn`、`wo_kernel`、`wo_residual`）。
+- **正式配置，不是超参堆场。** `configs/` 每个 split 一个 YAML：`lco`、`ldo`、`lpo`、`random`。
 
 ## 快速开始
 
@@ -58,10 +58,10 @@ python train.py --split ldo --seed 0 --fast-dev-run
 用正式超参训练：
 
 ```bash
-python train.py --split lco --seed 34 --config configs_final/lco.yaml
-python train.py --split ldo --seed 34 --config configs_final/ldo.yaml
-python train.py --split lpo --seed 34 --config configs_final/lpo.yaml
-python train.py --split random --seed 34 --config configs_final/random.yaml
+python train.py --split lco --seed 34 --config configs/lco.yaml
+python train.py --split ldo --seed 34 --config configs/ldo.yaml
+python train.py --split lpo --seed 34 --config configs/lpo.yaml
+python train.py --split random --seed 34 --config configs/random.yaml
 ```
 
 评估检查点，再按 seed 汇总：
@@ -93,7 +93,7 @@ unimos/
 train.py         单次训练
 tune.py          Optuna HPO
 evaluate.py      测试指标 + 核导出
-configs_final/   正式 split 配置与结构消融
+configs/         每个 split 的正式 YAML（lco、ldo、lpo、random）
 docs/assets/     架构图
 ```
 

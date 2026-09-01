@@ -3,7 +3,7 @@ train.py — UniMoS single-run training entry (SPEC-09).
 
 Usage
 -----
-python train.py --split ldo --seed 0 [--config configs/best_hparams.yaml]
+python train.py --split ldo --seed 0 [--config configs/ldo.yaml]
                 [--output-dir checkpoints/ldo/seed_0] [--max-epochs 2] [--fast-dev-run]
 
 Output
@@ -189,7 +189,6 @@ _FUNC     = _TRAIN_DATA / "function_nodes"
 # table with an index-based split silently selects the wrong rows -- see
 # scripts/materialize_splits.py.
 _PAIR_CSV = _TRAIN_DATA / "pairs" / "unimos_stratified_dataset.parquet"
-_DEFAULT_CFG = _REPO / "configs" / "default_hparams.yaml"
 
 # Config path fields that may still carry legacy data/ or data_vc_frozen/ prefixes.
 _PATH_FIELDS = (
@@ -958,7 +957,8 @@ def _parse_args() -> argparse.Namespace:
                    help="CV fold index (0-based). Omit for single 80/10/10 split.")
     p.add_argument("--n-folds",    type=int, default=5,
                    help="Total CV folds (default: 5). Used only with --fold.")
-    p.add_argument("--config",     type=Path, default=_DEFAULT_CFG)
+    p.add_argument("--config",     type=Path, default=None,
+                   help="Hyperparameter YAML. Default: configs/{split}.yaml")
     p.add_argument("--output-dir", type=Path, default=None)
     p.add_argument("--max-epochs", type=int,  default=None)
     p.add_argument("--patience",   type=int,  default=None,
@@ -994,7 +994,8 @@ def _parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = _parse_args()
-    cfg  = TrainConfig.from_yaml(args.config)
+    cfg_path = args.config if args.config is not None else _REPO / "configs" / f"{args.split}.yaml"
+    cfg  = TrainConfig.from_yaml(cfg_path)
     if args.max_epochs is not None:
         cfg.max_epochs = args.max_epochs
     if args.patience is not None:

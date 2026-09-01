@@ -39,7 +39,7 @@ The kernel is the scientific claim. The residual track is a gated backup for col
 - **Virtual-cell conditioning.** Unseen cell lines get a pretrained expression embedding instead of a one-hot or a 67-d activity vector alone.
 - **Cold-start splits as the protocol.** Official configs cover leave-drug-out, leave-cell-out, leave-pair-out, and random split — LDO/LCO are the ones that matter.
 - **Gated residual, not a second black box.** Structure and RI can rescue unannotated drugs; `α(z_cell)` is regularised so the kernel stays accountable.
-- **Official configs, not a hyperparameter dump.** `configs_final/` holds the four-split production settings and the matching structure ablations (`wo_vc`, `wo_gnn`, `wo_kernel`, `wo_residual`).
+- **Official configs, not a hyperparameter dump.** `configs/` has one YAML per split: `lco`, `ldo`, `lpo`, `random`.
 
 ## Quick start
 
@@ -58,10 +58,10 @@ python train.py --split ldo --seed 0 --fast-dev-run
 Train with the official configs:
 
 ```bash
-python train.py --split lco --seed 34 --config configs_final/lco.yaml
-python train.py --split ldo --seed 34 --config configs_final/ldo.yaml
-python train.py --split lpo --seed 34 --config configs_final/lpo.yaml
-python train.py --split random --seed 34 --config configs_final/random.yaml
+python train.py --split lco --seed 34 --config configs/lco.yaml
+python train.py --split ldo --seed 34 --config configs/ldo.yaml
+python train.py --split lpo --seed 34 --config configs/lpo.yaml
+python train.py --split random --seed 34 --config configs/random.yaml
 ```
 
 Evaluate a checkpoint, then pool seeds:
@@ -93,7 +93,7 @@ unimos/
 train.py         single run
 tune.py          Optuna HPO
 evaluate.py      test metrics + kernel export
-configs_final/   official split configs and structure ablations
+configs/         official YAML per split (lco, ldo, lpo, random)
 docs/assets/     architecture figure
 ```
 

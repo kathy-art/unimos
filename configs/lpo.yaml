@@ -21,7 +21,7 @@ graph_cache: data/processed/drug_graphs.pt
 struct_encoder: gnn
 patience: 20
 batch_size: 256
-use_virtual_cell: false
+use_virtual_cell: true
 ablation_mode: full
 use_synergy_regression: true
 syn_metric_cols:
@@ -40,5 +40,3 @@ syn_metric_weight_values:
 - 1.0
 - 1.0
 pos_weight_scale: 1.044088512210933
-_hpo: opt/hpo_fixsplit/lpo.db (study lpo_fixsplit), tuning seed 34, val_auroc
-_ablation: 'wo_vc: use_virtual_cell=False'

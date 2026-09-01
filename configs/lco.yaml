@@ -18,7 +18,7 @@ fm_kernel_self_mask: true
 fm_out_dim: 128
 z_cell_dim: 128
 graph_cache: data/processed/drug_graphs.pt
-struct_encoder: fp
+struct_encoder: gnn
 patience: 20
 batch_size: 256
 use_virtual_cell: true
@@ -36,5 +36,3 @@ syn_winsorize_pct:
 - 99.0
 early_stop_metric: val_auroc
 pos_weight_scale: 1.4466923520196722
-_hpo: opt/hpo_fixsplit/lco.db (study lco_fixsplit), tuning seed 34, val_auroc
-_ablation: 'wo_gnn: struct_encoder=fp'

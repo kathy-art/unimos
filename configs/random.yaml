@@ -1,15 +1,15 @@
-cell_hidden: 128
-struct_hidden: 256
-rank_r: 32
-lr: 0.00010926705931940628
-dropout: 0.15760226190399323
-lambda_ri: 0.7438093254534331
-lambda_res: 0.06469407927668873
-lambda_W: 1.6842080674263872e-05
-lambda_gamma: 0.00020839141383214102
-lambda_gate: 3.419614694798142e-05
+cell_hidden: 256
+struct_hidden: 512
+rank_r: 16
+lr: 0.0002793797173757415
+dropout: 0.209510259902221
+lambda_ri: 0.01645467278751794
+lambda_res: 0.042027898720478754
+lambda_W: 0.0003821264122705808
+lambda_gamma: 0.00015614785776766683
+lambda_gate: 0.000315007374663776
 loss_type: bce
-focal_gamma: 2.5035910730488915
+focal_gamma: 2.0
 max_epochs: 200
 cell_cond_mode: fm_kernel_interp
 fm_emb_path: data/processed/cell_fm_emb_padded.npy
@@ -23,7 +23,6 @@ patience: 20
 batch_size: 256
 use_virtual_cell: true
 ablation_mode: full
-pos_weight_scale: 1.3988334622359178
 use_synergy_regression: true
 syn_metric_cols:
 - zip
@@ -36,4 +35,3 @@ syn_winsorize_pct:
 - 1.0
 - 99.0
 early_stop_metric: val_auroc
-_hpo: opt/hpo_fixsplit/ldo.db (study ldo_fixsplit), tuning seed 34, val_auroc
