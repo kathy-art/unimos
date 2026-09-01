@@ -1,143 +1,132 @@
-# UniMoS-VC — Unified Multi-Omics Synergy Predictor
+# UniMoS
 
-UniMoS-VC 是用于**药物组合协同效应预测**的可解释深度学习模型。在细胞条件化双线性核（pathway aggregation kernel）上，用虚拟细胞上下文 `z_cell`（scFoundation embedding + 功能活性 + 表达残差）同时条件化核轨道与残差轨道。
+**Interpretable drug-combination synergy prediction, conditioned on a virtual cell.**
 
-本仓库只发布**模型核心代码、训练/评估入口和正式超参**，不含原始数据、检查点或论文图表。
+A dual-track model: a cell-conditioned pathway kernel that you can read, plus a residual track that catches what the kernel cannot see.
 
----
+[![Python](https://img.shields.io/badge/python-3.10-3776AB.svg)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.x-EE4C2C.svg)](https://pytorch.org/)
+[![Lightning](https://img.shields.io/badge/Lightning-2.x-792EE5.svg)](https://lightning.ai/)
 
-## 模型核心
-
-```
-输入
- ├── VirtualCellModule
- │     z_fm    = FoundationCellEncoder(scFoundation lookup)
- │     c       = c_fn + α_mut · c_mut_fn
- │     h_cell  = CellEncoder(HVG expression)
- │         └──→ z_cell = FuseMLP([z_fm ; c ; h_cell])
- │
- ├── 核轨道（可解释）
- │     pA, pB ∈ R^67   药物功能节点扰动向量
- │         └──→ PathwayAggregationKernel(pA, pB, z_cell)
- │                  W(z_cell) = W_base + ΔW_lowrank(z_cell)
- │                  score = pAᵀ W_sym pB + γ·(pA ⊙ pB)
- │
- └── 残差轨道（数据驱动）
-       h_struct = StructureEncoder(fp/GIN)
-       ri_repr  = RIEncoder(p, z_cell)
-           └──→ SynergyHead → resid_logit
-
-输出
-  logit = core_logit + α(z_cell) · resid_logit
-  ŷ_class  = σ(logit)        主任务：Loewe > 10 二分类
-  ŷ_ri_A/B = RIHead(ri_repr) 辅助任务：单药 RI 回归
-```
-
-核心实现：
-
-| 文件 | 作用 |
-|------|------|
-| `unimos/model/unimos.py` | LightningModule：组装前向、多任务损失、指标 |
-| `unimos/model/virtual_cell.py` | `FoundationCellEncoder` + `FuseMLP` + `VirtualCellModule` |
-| `unimos/model/pathway_kernel.py` | 细胞条件化双线性核 `W(z_cell)`、γ、功能节点贡献 |
-| `unimos/model/encoders.py` | Structure / Cell / RI / Synergy heads |
-| `unimos/model/gin_encoder.py` | 可选 GIN 分子图编码器 |
-| `unimos/training/loss.py` | BCE/Focal + Huber RI + 核正则 |
-| `unimos/training/metrics.py` | AUROC / AUPRC / 阈值选择 |
+[English](README.md) · [简体中文](README.zh-CN.md)
 
 ---
 
-## 环境
+UniMoS predicts whether two drugs are synergistic in a given cell line (Loewe > 10). The kernel track scores cross-pathway interactions in a 67-node function space; the virtual-cell module folds a frozen scFoundation embedding, functional activity, and residual expression into one context vector `z_cell` that conditions both tracks.
+
+> [!NOTE]
+> This repository releases **model code, training/eval entry points, and official hyperparameters**. Preprocessed DrugComb features, checkpoints, and manuscript figures are not bundled.
+
+## Architecture
+
+The kernel is the scientific claim. The residual track is a gated backup for cold-start drugs with missing targets. `z_cell` conditions both, so unseen cell lines are not scored with a static pathway matrix.
+
+```mermaid
+flowchart LR
+    subgraph inputs [Inputs]
+      P["pA, pB<br/>function nodes"]
+      S["structure<br/>FP / GIN"]
+      E["cell expression"]
+    end
+
+    subgraph vc [Virtual cell]
+      Z["z_cell = Fuse(z_fm, c, h_cell)"]
+    end
+
+    subgraph kernel [Kernel track]
+      W["W(z_cell) = W_base + ΔW"]
+      C["core logit"]
+    end
+
+    subgraph resid [Residual track]
+      R["resid logit"]
+    end
+
+    Y["logit = core + α(z_cell) · resid"]
+
+    P --> W
+    E --> Z
+    Z --> W --> C --> Y
+    S --> R --> Y
+    Z --> R
+```
+
+| Piece | What it actually does |
+| --- | --- |
+| **Virtual cell** | Looks up a frozen scFoundation embedding, fuses it with 67-d functional activity and an HVG expression encoder, and emits `z_cell`. |
+| **Pathway kernel** | Builds a symmetric bilinear matrix `W(z_cell)` over function nodes. `pAᵀ W pB` is the cross-pathway synergy score; `γ` captures same-node synergy vs redundancy. |
+| **Residual track** | Encodes Morgan fingerprints (or a GIN graph) and single-drug RI. Used when the kernel has no target annotation to work with. |
+| **Gate** | `α(z_cell)` scales the residual. The kernel remains the default explanation; the residual is not allowed to silently dominate. |
+| **Heads** | Primary task: synergy classification. Auxiliary: single-drug RI regression (optional ZIP/HSA/Bliss regression in the official configs). |
+
+## Key features
+
+- **Mechanism-shaped kernel, not a post-hoc explainer.** Synergy is scored in function-node space. `W_sym` and per-drug contributions are model outputs, not SHAP after the fact.
+- **Virtual-cell conditioning.** Unseen cell lines get a pretrained expression embedding instead of a one-hot or a 67-d activity vector alone.
+- **Cold-start splits as the protocol.** Official configs cover leave-drug-out, leave-cell-out, leave-pair-out, and random split — LDO/LCO are the ones that matter.
+- **Gated residual, not a second black box.** Structure and RI can rescue unannotated drugs; `α(z_cell)` is regularised so the kernel stays accountable.
+- **Official configs, not a hyperparameter dump.** `configs_final/` holds the four-split production settings and the matching structure ablations (`wo_vc`, `wo_gnn`, `wo_kernel`, `wo_residual`).
+
+## Quick start
+
+> [!TIP]
+> Place preprocessed features under `train_data/` first. The file list is in [docs/data.md](docs/data.md). Without that directory the training entry will not run.
 
 ```bash
 conda create -n unimos python=3.10
 conda activate unimos
 pip install -r requirements.txt
-```
 
-GIN 结构编码器还需要 `torch-geometric`（按本机 PyTorch / CUDA 版本安装）。
-
----
-
-## 数据（需自行放置）
-
-训练入口默认读 `train_data/`（可用 `--proc-dir` / `--func-dir` 覆盖）：
-
-| 文件 | 内容 |
-|------|------|
-| `train_data/pairs/unimos_stratified_dataset.parquet` | 主表 |
-| `train_data/processed/cell_fn_vectors.npy` | 细胞功能节点活性 |
-| `train_data/processed/cell_mut_fn_vectors.npy` | 细胞突变功能节点 |
-| `train_data/processed/cell_raw_expr.npy` | 细胞原始表达 |
-| `train_data/processed/drug_morgan_fps.npy` | Morgan 指纹 |
-| `train_data/processed/cell_feature_index.json` | 细胞名 → 行索引 |
-| `train_data/processed/drug_morgan_index.json` | InChIKey → 行索引 |
-| `train_data/processed/cell_fm_emb.npy` | scFoundation 细胞 embedding（VC） |
-| `train_data/function_nodes/` | 每药一个功能节点 `.npy` |
-
-VC embedding 可用：
-
-```bash
-python -m unimos.data.precompute_fm_emb \
-    --depmap-csv data/Depmap/OmicsExpressionTPMLogp1HumanProteinCodingGenes.csv \
-    --scfoundation-dir data/external/scfoundation/official \
-    --ckpt data/external/scfoundation/hf_mirror/models.ckpt \
-    --cell-feature-index data/processed/cell_feature_index.json \
-    --output data/processed/cell_fm_emb.npy
-```
-
----
-
-## 训练
-
-```bash
-# 快速验证
+# smoke test (2 epochs, one split)
 python train.py --split ldo --seed 0 --fast-dev-run
+```
 
-# 正式超参（四场景）
+Train with the official configs:
+
+```bash
 python train.py --split lco --seed 34 --config configs_final/lco.yaml
 python train.py --split ldo --seed 34 --config configs_final/ldo.yaml
 python train.py --split lpo --seed 34 --config configs_final/lpo.yaml
 python train.py --split random --seed 34 --config configs_final/random.yaml
 ```
 
-评估拆分：`ldo`（leave-drug-out）/ `lco`（leave-cell-out）/ `lpo`（leave-pair-out）/ `random`。
+Evaluate a checkpoint, then pool seeds:
 
 ```bash
 python evaluate.py run --checkpoint checkpoints/lco/seed_34/best.ckpt --split lco --seed 34
 python summarize.py --outputs-dir checkpoints/ --results-dir results/
 ```
 
-超参搜索：
+Optional: Optuna search (`tune.py`) and novel-pair scoring (`scripts/predict_novel_pair.py`). The GIN encoder additionally needs `torch-geometric` installed for your PyTorch/CUDA pair.
 
-```bash
-python tune.py --split ldo --seed 0 --n-trials 30 --output configs/best_hparams.yaml
-```
+## Evaluation splits
 
-新药对推理：
+| Split | Held out | Difficulty |
+| --- | --- | --- |
+| `ldo` | drugs unseen in training | hardest |
+| `lco` | cell lines unseen in training | hard |
+| `lpo` | drug pairs unseen; single drugs seen | medium |
+| `random` | random rows | easy; sanity check only |
 
-```bash
-python scripts/predict_novel_pair.py --help
-```
+## Repository layout
 
----
-
-## 仓库结构
-
-```
+```text
 unimos/
-├── model/                 模型核心
-│   ├── unimos.py
-│   ├── virtual_cell.py
-│   ├── pathway_kernel.py
-│   ├── encoders.py
-│   └── gin_encoder.py
-├── training/              损失与指标
-├── data/                  Dataset / split / FM embedding 预计算
-└── eval/                  基线、校准、可解释性导出
-train.py                   单次训练
-tune.py                    Optuna HPO
-evaluate.py                评估 + 核权重导出
-configs/default_hparams.yaml
-configs_final/             四场景正式超参及结构消融
+  model/         UniMoS LightningModule, virtual cell, pathway kernel, encoders
+  training/      multi-task loss and metrics
+  data/          dataset, splits, scFoundation embedding precompute
+  eval/          baselines, calibration, interpretability export
+train.py         single run
+tune.py          Optuna HPO
+evaluate.py      test metrics + kernel export
+configs_final/   official split configs and structure ablations
+docs/            data layout and extra notes
 ```
+
+## Documentation
+
+- [Data layout](docs/data.md): `train_data/` files the trainer expects, and how to precompute the virtual-cell embedding
+
+## License
+
+No license file is attached yet. Read and reproduce; for any other use, contact the authors.
