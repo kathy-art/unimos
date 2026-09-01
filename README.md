@@ -18,7 +18,7 @@ UniMoS predicts whether two drugs are synergistic in a given cell line (Loewe > 
 > This repository releases **model code, training/eval entry points, and official hyperparameters**. Preprocessed DrugComb features and checkpoints are not bundled.
 
 <p align="center">
-  <img src="docs/assets/architecture.jpg" alt="UniMoS architecture" width="100%">
+  <img src="docs/assets/architecture.png" alt="UniMoS architecture" width="100%">
 </p>
 
 ## Architecture

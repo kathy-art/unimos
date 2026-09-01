@@ -18,7 +18,7 @@ UniMoS 预测两种药在给定细胞系里是否协同（Loewe > 10）。核轨
 > 本仓库只发布**模型代码、训练/评估入口和正式超参**。预处理 DrugComb 特征和检查点不随仓库分发。
 
 <p align="center">
-  <img src="docs/assets/architecture.jpg" alt="UniMoS 架构图" width="100%">
+  <img src="docs/assets/architecture.png" alt="UniMoS 架构图" width="100%">
 </p>
 
 ## 架构
