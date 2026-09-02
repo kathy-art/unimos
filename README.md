@@ -7,6 +7,7 @@ A dual-track model: a cell-conditioned pathway kernel that you can read, plus a 
 [![Python](https://img.shields.io/badge/python-3.10-3776AB.svg)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.x-EE4C2C.svg)](https://pytorch.org/)
 [![Lightning](https://img.shields.io/badge/Lightning-2.x-792EE5.svg)](https://lightning.ai/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 [English](README.md) · [简体中文](README.zh-CN.md)
 
@@ -99,4 +100,4 @@ docs/assets/     architecture figure
 
 ## License
 
-No license file is attached yet. Read and reproduce; for any other use, contact the authors.
+Licensed under the MIT License. See [LICENSE](LICENSE) for the full text.

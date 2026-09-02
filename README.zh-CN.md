@@ -7,6 +7,7 @@
 [![Python](https://img.shields.io/badge/python-3.10-3776AB.svg)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.x-EE4C2C.svg)](https://pytorch.org/)
 [![Lightning](https://img.shields.io/badge/Lightning-2.x-792EE5.svg)](https://lightning.ai/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 [English](README.md) · [简体中文](README.zh-CN.md)
 
@@ -99,4 +100,4 @@ docs/assets/     架构图
 
 ## 许可
 
-仓库尚未附带 LICENSE。阅读和复现可以；其他用途请先联系作者。
+采用 MIT License。全文见 [LICENSE](LICENSE)。
