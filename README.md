@@ -1,6 +1,6 @@
 # UniMoS
 
-**Interpretable drug-combination synergy prediction, conditioned on a virtual cell.**
+**Cell-conditioned pathway interactions predict drug-combination synergy and nominate combinations active in hepatobiliary tumour models**
 
 A dual-track model: a cell-conditioned pathway kernel that you can read, plus a residual track that catches what the kernel cannot see.
 
